@@ -25,25 +25,83 @@ const maxPlayers = 2;
 const numRows = 3;
 const numCols = 3;
 
+let x_wins;
+const previousX = localStorage.getItem("X");
+if (previousX) x_wins = previousX;
+else x_wins = 0;
+document.getElementById("x_wins").innerText = x_wins;
 
-let currentPlayer = 0;
+let o_wins;
+const previousO = localStorage.getItem("O");
+if (previousO) o_wins = previousO;
+else o_wins = 0;
+document.getElementById("o_wins").innerText = o_wins;
+
+let player_wins = {}
+
+
 const playerSymbols = ["X", "O"];
+// playerSymbols.forEach(symbol => {
+//     player_wins[symbol] = 0;
+// });
+// player_wins = {
+//     "X": 0,
+//     "O": 0
+// }
+
+let num_draws = 0;
+
+
+let gameData = localStorage.getItem("Game data");
+let currentPlayer;
+let gridData;
+if (gameData) {
+    gameData = JSON.parse(gameData);
+    currentPlayer = gameData["currentPlayer"];
+    gridData = gameData["gridData"];
+}
+else {
+    currentPlayer = 0;
+    gridData = [
+            "", "", "",
+            "", "", "",
+            "", "", "",
+        ];
+    // Grid stroage
+    let gameData = {
+        // "currentPlayer": currentPlayer,
+        currentPlayer,
+        gridData,
+    }
+}
+
+
+
+
+
 
 console.log("Start!");
 
 const cells = document.getElementsByTagName("td");
-for (cellNum = 0; cellNum < cells.length; cellNum++) {
+for (let cellNum = 0; cellNum < cells.length; cellNum++) {
+    cells[cellNum].innerText = gridData[cellNum];
     cells[cellNum].addEventListener("click", (event) => {
         const clickedCell = event.target;
         console.log("clicked");
         if (!clickedCell.innerText) {
             clickedCell.innerText = playerSymbols[currentPlayer];
+            gameData.gridData[cellNum] = playerSymbols[currentPlayer];
+            console.log(`Grid data: ${gameData.gridData}`);
             checkEndGame();
             currentPlayer++ 
             currentPlayer = currentPlayer % maxPlayers;
+            gameData["currentPlayer"] = currentPlayer;
+            localStorage.setItem("Game data", JSON.stringify(gameData));            
         } 
     });
 }
+
+// console.log(`Cell num: ${cellNum}`);
 
 const timer = document.getElementById("timer");
 let startTime = new Date();
@@ -79,6 +137,14 @@ function checkEndGame() {
         }
         if (isAllTheSame) {
             alert(firstColValue + " has won!!");
+            if (firstColValue === "X") {
+                x_wins++;
+                localStorage.setItem("X", x_wins);
+            }
+            else {
+                o_wins++;
+                localStorage.setItem("O", o_wins);
+            }
             clearInterval(timerInterval);
         }
     } 
@@ -104,7 +170,17 @@ function checkEndGame() {
             console.log(`Col: ${col} Row: ${row}`);
             isAllTheSame = isAllTheSame && firstRowValue === cells[currentCol+row*numCols].innerText;
         }
-        if (isAllTheSame) alert(firstRowValue + " has won!!");
+        if (isAllTheSame) {
+            alert(firstRowValue + " has won!!");
+            if (firstRowValue === "X") {
+                x_wins++;
+                localStorage.setItem("X", x_wins);
+            }
+            else {
+                o_wins++;
+                localStorage.setItem("O", o_wins);
+            }
+        }
     }     
     // if (isNotEmpty) alert("Game is a draw");
 
